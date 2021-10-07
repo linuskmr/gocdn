@@ -1,4 +1,4 @@
-module distrihttp
+module gocdn
 
 go 1.17
 
