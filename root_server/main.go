@@ -14,7 +14,7 @@ import (
 
 type RootServer struct {
 	// ServeDir is the directory that should be served by RootServer.
-	ServeDir   string
+	ServeDir string
 	// cdnServers is a list of all registered cdn servers of this root server.
 	cdnServers []string
 	// SelfServedFileTypes is a list of file extensions that always should be served
@@ -27,7 +27,7 @@ type RootServer struct {
 }
 
 // handleCdnConnect handles the connection request from a cdn server.
-func (s *RootServer) handleCdnConnect(w http.ResponseWriter, r* http.Request) {
+func (s *RootServer) handleCdnConnect(w http.ResponseWriter, r *http.Request) {
 	// Read body from request
 	var bodyBuffer strings.Builder
 	bufio.NewReader(r.Body).WriteTo(&bodyBuffer)
@@ -63,7 +63,7 @@ func (s *RootServer) serveFileMyself(file string) bool {
 	return false
 }
 
-func (s *RootServer) ServeHTTP(w http.ResponseWriter, r* http.Request) {
+func (s *RootServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/cdn_register" && r.Method == http.MethodPost {
 		s.handleCdnConnect(w, r)
 		return
@@ -82,7 +82,7 @@ func (s *RootServer) ServeHTTP(w http.ResponseWriter, r* http.Request) {
 		// Let a random cdn server serve the request
 		cdnServer := s.randomCdnServer()
 		logo.Debug("Redirecting to cdn server", cdnServer)
-		http.Redirect(w, r, cdnServer + r.URL.Path, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, cdnServer+r.URL.Path, http.StatusTemporaryRedirect)
 	}
 
 	/*var fileContent bytes.Buffer
@@ -125,8 +125,14 @@ func quote(v interface{}) string {
 
 func main() {
 	addr := flag.String("addr", ":8192", "Address of this root server")
-	serveDir := flag.String("serve-dir", "", "Filesystem path to be served")
-	selfServedFileTypesStr := flag.String("self-serve", "", "Comma seperated list of file types that should be served by the root server itself.")
+	serveDir := flag.String("serve-dir", ".", "Filesystem path to be served")
+	selfServedFileTypesStr := flag.String(
+		"self-serve", "",
+		"Comma seperated list of file types that should be served by the root server itself. Usually you want"+
+			"that the root server serves .html files by itself, so that the clients web browser does not get redirected"+
+			"to a cdn server, which causes the url bar in the clients web browser to show the url of the cdn server,"+
+			"which will confuse users.",
+	)
 	flag.Parse()
 	var selfServedFileTypes []string
 	if *selfServedFileTypesStr != "" {
