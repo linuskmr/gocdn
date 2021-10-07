@@ -26,12 +26,12 @@ func fileExists(filename string) bool {
 type CdnServer struct {
 	// CachePath is the path to the directory where the CDN server saves cached files
 	// from the root server.
-	CachePath  string
+	CachePath string
 	// RootServer is the URL of the root server to load data from.
 	RootServer string
 }
 
-func (c *CdnServer) ServeHTTP(w http.ResponseWriter, r* http.Request) {
+func (c *CdnServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	logo.Print("Request to", r.URL.Path)
 
 	if fileExists(c.pathToCache(r.URL.Path)) {
@@ -146,7 +146,7 @@ func quote(v interface{}) string {
 
 /// registerAtRootServer registers this CdnServer at its root server by sending a post request to it.
 func (c *CdnServer) registerAtRootServer(addr string) {
-	_, err := http.Post(c.RootServer + "/cdn_register", "", strings.NewReader(addr))
+	_, err := http.Post(c.RootServer+"/cdn_register", "", strings.NewReader(addr))
 	if err != nil {
 		logo.Fatal("Registration at root server", quote(c.RootServer), "failed:", err)
 	} else {
@@ -180,8 +180,8 @@ func main() {
 	logo.Default.DateFormat = ""
 
 	listenAddr := flag.String("listen-addr", ":8193", "Address where the this CDN server should listen")
-	remoteAddr := flag.String("remote-addr", "", "The address this server is reachable at for clients redirected by the root server")
-	rootAddr := flag.String("root-addr", "", "Address of the root server that should be mirrored")
+	remoteAddr := flag.String("remote-addr", "http://localhost:8193", "The address this server is reachable at for clients redirected by the root server")
+	rootAddr := flag.String("root-addr", "http://localhost:8192", "Address of the root server that should be mirrored")
 	flag.Parse()
 	logo.Debug("Config:")
 	logo.Debug("  listenAddr:", quote(*listenAddr))
@@ -200,7 +200,7 @@ func main() {
 	// Listen for interrupt or termination signal
 	signalChan := make(chan os.Signal)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
-	exitSignal := <- signalChan // Wait for a termination signal
+	exitSignal := <-signalChan // Wait for a termination signal
 
 	logo.Info("Received", exitSignal, "from os. Shutting down")
 }
